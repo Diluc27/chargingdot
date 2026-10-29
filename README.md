@@ -2,19 +2,23 @@
 
 Charging Dot is a lightweight Android utility that displays an indicator dot on the screen while the device is charging. It renders an accessibility overlay positioned near the screen corner, changing color based on battery level and charging status. The app uses no background polling, no timers, and requires no network access.
 
-<!--
-Screenshot slot: place images in docs/screenshots/
-- docs/screenshots/settings.png: Settings and calibration UI
-- docs/screenshots/dot_overlay.png: Dot overlay near display corner
-- docs/screenshots/fake_aod.png: Fake AOD mode on pure black background
--->
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" alt="Settings and Calibration" width="300" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/fake_aod.png" alt="Fake AOD Mode" width="300" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/dot_overlay.png" alt="Dot Overlay on Status Bar" width="600" />
+</p>
 
 ## Features
 
 - Lightweight overlay rendered through Android's AccessibilityService framework (`TYPE_ACCESSIBILITY_OVERLAY`).
-- Event-driven state updates triggered exclusively by system broadcasts (`ACTION_BATTERY_CHANGED` and `ACTION_SCREEN_OFF`). No timers, no polling, and no background wake locks.
+- Event-driven state updates triggered exclusively by system broadcasts (`ACTION_BATTERY_CHANGED` and `ACTION_SCREEN_OFF`). No timers, no polling, and no background wake locks in normal operation.
 - Two-state battery threshold indicator: displays a low color below a configurable threshold, and flips to a high color at or above the threshold or when full.
-- Battery protection detection: treats `BATTERY_STATUS_NOT_CHARGING` with level >= 80% as full when plugged in.
+- Battery protection detection: treats `BATTERY_STATUS_NOT_CHARGING` with level >= 80% as full when plugged in (covering Samsung battery protection).
 - Calibration controls with live preview: adjust size (3.0 to 8.0 dp), horizontal offset X (0.0 to 80.0 dp), vertical offset Y (0.0 to 80.0 dp), corner selection (top-left or top-right), preset colors, and threshold percentage.
 - Optional Fake AOD mode: displays the dot on a fullscreen pure black window when the screen turns off while plugged in.
 
@@ -26,12 +30,13 @@ Screenshot slot: place images in docs/screenshots/
 
 ## Install
 
-1. Download the latest release APK (`app-release.apk`) from the GitHub Releases page.
+1. Download the release APK (`chargingdot-<version>.apk`) and checksum file (`chargingdot-<version>.apk.sha256`) from GitHub Releases.
 2. Sideload and install the APK on your device.
 3. Open **Charging Dot** from the app launcher.
 4. Tap **Enable Accessibility Service** to open the system accessibility settings, locate **Charging Dot Indicator**, and toggle it on.
 5. **Android 13+ "Allow restricted settings" step:**
    If the toggle in Accessibility is greyed out with a message stating "Restricted setting":
+   *(Note: On Android 13+, the "Allow restricted settings" option in App Info may only appear after you attempt to enable the service once in Accessibility settings.)*
    - Open device **Settings** > **Apps** > **Charging Dot** (or tap **App Info** inside the app).
    - Tap the three-dot menu icon in the upper-right corner.
    - Tap **Allow restricted settings** and confirm your device credential.
@@ -39,6 +44,26 @@ Screenshot slot: place images in docs/screenshots/
 6. **Battery optimization:**
    - Tap **Battery Optimization Settings** in the app (or navigate to App Info > Battery).
    - Set battery usage to **Unrestricted** to prevent the operating system from terminating the service during background execution.
+
+## Verify Your Download
+
+Each release includes an automated `.sha256` checksum file. You can verify the integrity of your downloaded APK before installing:
+
+**On Linux / macOS:**
+```bash
+sha256sum -c chargingdot-<version>.apk.sha256
+```
+Or compute the hash manually:
+```bash
+sha256sum chargingdot-<version>.apk
+```
+
+**On Windows (PowerShell):**
+```powershell
+Get-FileHash chargingdot-<version>.apk -Algorithm SHA256
+```
+
+Compare the resulting hash against the contents of `chargingdot-<version>.apk.sha256`.
 
 ## Calibrate
 
@@ -53,7 +78,7 @@ Screenshot slot: place images in docs/screenshots/
 
 Fake AOD is an opt-in feature disabled by default.
 
-When enabled in settings, the app monitors `ACTION_SCREEN_OFF`. If the screen turns off while the device is plugged in, the service launches a fullscreen black activity (`FakeAodActivity`) that holds the screen awake at a configured brightness level (default 0.60) and draws the dot.
+When enabled in settings, the app monitors `ACTION_SCREEN_OFF`. If the screen turns off while the device is plugged in, the service launches a fullscreen black activity (`FakeAodActivity`) that holds the screen on while it is showing at a configured brightness level (default 0.60) and draws the dot.
 
 ### Caveats
 
@@ -67,10 +92,10 @@ When enabled in settings, the app monitors `ACTION_SCREEN_OFF`. If the screen tu
 - **Zero permissions:** The application requests no permissions in `AndroidManifest.xml`. Specifically, `android.permission.INTERNET` is absent.
 - Verify with `aapt2 dump permissions <path-to-apk>`:
   ```bash
-  aapt2 dump permissions app-release.apk
+  aapt2 dump permissions chargingdot-<version>.apk
   ```
-  The command outputs nothing, confirming no permissions are requested.
-- **No data access:** The accessibility service configuration specifies `canRetrieveWindowContent="false"` and subscribes to no event types (`accessibilityEventTypes=""`). It cannot inspect screen contents, observe user input, or capture keystrokes.
+  The command prints only the `package:` line; no `uses-permission:` lines appear, confirming no permissions are requested.
+- **No data access:** The accessibility service configuration specifies `canRetrieveWindowContent="false"` and completely omits `accessibilityEventTypes` (rather than specifying an empty value). It cannot inspect screen contents, observe user input, or capture keystrokes.
 - No analytics, logging backends, or third-party SDKs are included.
 
 ## Known Limitations

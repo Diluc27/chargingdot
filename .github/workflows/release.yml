@@ -15,27 +15,50 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4.5.0
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3.5.0
+        uses: gradle/actions/setup-gradle@d9c87d481d55275bb5441eef3fe0e46805f9ef70 # v3.5.0
 
       - name: Make Gradle Wrapper Executable
         run: chmod +x ./gradlew
 
-      - name: Validate Release Signing Secrets
+      - name: Verify Tag Matches Version Name
+        id: version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ] || [ -z "${{ secrets.KEYSTORE_PASSWORD }}" ] || [ -z "${{ secrets.KEY_ALIAS }}" ] || [ -z "${{ secrets.KEY_PASSWORD }}" ]; then
+          VERSION_NAME=$(grep -o 'versionName = "[^"]*"' app/build.gradle.kts | cut -d '"' -f 2)
+          TAG_WITHOUT_V="${TAG_NAME#v}"
+          echo "Tag: $TAG_NAME (without v: $TAG_WITHOUT_V), App versionName: $VERSION_NAME"
+          if [ "$TAG_WITHOUT_V" != "$VERSION_NAME" ]; then
+            echo "::error::Tag '$TAG_NAME' does not match app versionName '$VERSION_NAME' in app/build.gradle.kts"
+            exit 1
+          fi
+          echo "version=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Run Tests and Lint
+        run: ./gradlew testDebugUnitTest lintDebug
+
+      - name: Validate and Decode Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
             echo "::error::Release signing secrets (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD) must be provided for tag releases."
             exit 1
           fi
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
 
       - name: Build Release APK
         env:
@@ -49,17 +72,21 @@ jobs:
       - name: Verify APK Signature
         run: |
           BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
-          "$BUILD_TOOLS_DIR/apksigner" verify --verbose app/build/outputs/apk/release/app-release.apk
+          "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
 
-      - name: Generate SHA-256 Checksum
+      - name: Package and Checksum Release Artifacts
         run: |
-          cd app/build/outputs/apk/release
-          sha256sum app-release.apk > app-release.apk.sha256
+          VERSION_NAME="${{ steps.version.outputs.version }}"
+          OUTPUT_DIR="app/build/outputs/apk/release"
+          cd "$OUTPUT_DIR"
+          mv app-release.apk "chargingdot-${VERSION_NAME}.apk"
+          sha256sum "chargingdot-${VERSION_NAME}.apk" > "chargingdot-${VERSION_NAME}.apk.sha256"
+          cat "chargingdot-${VERSION_NAME}.apk.sha256"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
         with:
           files: |
-            app/build/outputs/apk/release/app-release.apk
-            app/build/outputs/apk/release/app-release.apk.sha256
+            app/build/outputs/apk/release/chargingdot-${{ steps.version.outputs.version }}.apk
+            app/build/outputs/apk/release/chargingdot-${{ steps.version.outputs.version }}.apk.sha256
           generate_release_notes: true
