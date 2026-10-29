@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Charging Dot</string>
+    <string name="service_label">Charging Dot Indicator</string>
+    <string name="service_description">Displays a subtle charging indicator dot on the top-left screen corner. It does not read or collect anything from your screen.</string>
+
+    <string name="status_checking">Checking service status…</string>
+    <string name="status_active">Accessibility Service: Active</string>
+    <string name="status_disabled">Accessibility Service: Disabled</string>
+    <string name="btn_open_settings">Accessibility Settings</string>
+    <string name="btn_enable_service">Enable Accessibility Service</string>
+
+    <string name="setup_help_title">Setup Help</string>
+    <string name="btn_app_info">App Info (Allow Restricted Settings)</string>
+    <string name="desc_app_info">On Android 13+, tap the 3 dots in the top-right of App Info and tap \'Allow restricted settings\' if accessibility is greyed out.</string>
+    <string name="btn_battery_opt">Battery Optimization Settings</string>
+    <string name="desc_battery_opt">Set battery to Unrestricted so Android does not kill the dot indicator in the background.</string>
+
+    <string name="calibration_title">Dot Calibration</string>
+    <string name="corner_title">Screen Corner</string>
+    <string name="corner_top_left">Top-Left</string>
+    <string name="corner_top_right">Top-Right</string>
+
+    <string name="color_low_title">Color Below Threshold</string>
+    <string name="color_high_title">Color At / Above Threshold (or Full)</string>
+    <string name="btn_reset_defaults">Reset to Defaults</string>
+
+    <string name="fake_aod_title">Fake AOD (Experimental)</string>
+    <string name="fake_aod_warning">Visible Warning: Keeps the screen on at low brightness while charging. Can cause AMOLED burn-in. The screen can\'t be turned off until unplugged, and tapping the black screen exits it.</string>
+</resources>

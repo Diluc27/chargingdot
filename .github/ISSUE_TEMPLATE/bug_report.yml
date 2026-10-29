@@ -1,0 +1,50 @@
+name: Bug Report
+description: File a bug report for Charging Dot
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide the following information to help diagnose and reproduce the issue.
+  - type: input
+    id: device_model
+    attributes:
+      label: Phone Model
+      description: Exact device hardware model (e.g., Samsung Galaxy A35 5G, Google Pixel 7).
+      placeholder: e.g. Samsung Galaxy A35 5G
+    validations:
+      required: true
+  - type: input
+    id: os_version
+    attributes:
+      label: Android / OS Version
+      description: Android version and OEM skin (e.g., Android 14 / One UI 6.0, Android 13).
+      placeholder: e.g. Android 14 / One UI 6.0
+    validations:
+      required: true
+  - type: input
+    id: app_version
+    attributes:
+      label: App Version
+      description: Charging Dot version (found in the settings footer).
+      placeholder: e.g. 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: service_status
+    attributes:
+      label: Is the Accessibility Service enabled?
+      description: Check if the Charging Dot Indicator toggle is turned ON in system Accessibility settings.
+      options:
+        - "Yes (Active)"
+        - "No (Disabled)"
+        - "Greyed out (Restricted settings blocked)"
+    validations:
+      required: true
+  - type: textarea
+    id: observation
+    attributes:
+      label: What do you see?
+      description: Describe what actually happened versus what you expected to happen, including any steps to reproduce.
+    validations:
+      required: true
