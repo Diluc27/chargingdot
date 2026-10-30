@@ -60,6 +60,26 @@ jobs:
           fi
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
 
+      - name: Check keystore
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "KEY_ALIAS length: ${#KEY_ALIAS}"
+          if [[ "$KEY_ALIAS" =~ [[:space:]] ]]; then
+            echo "KEY_ALIAS contains whitespace: yes"
+          else
+            echo "KEY_ALIAS contains whitespace: no"
+          fi
+          echo "Keystore entries and fingerprints:"
+          keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" | grep -E "Entry|SHA-256" || true
+          if keytool -list -keystore "$KEYSTORE_PATH" -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" > /dev/null 2>&1; then
+            echo "alias OK"
+          else
+            echo "alias NOT FOUND"
+          fi
+
       - name: Build Release APK
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/release.keystore

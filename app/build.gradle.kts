@@ -25,21 +25,21 @@ android {
                 FileInputStream(keystorePropsFile).use { keystoreProps.load(it) }
             }
 
-            val storeFilePath = System.getenv("KEYSTORE_PATH")
+            val storeFilePath = (System.getenv("KEYSTORE_PATH")
                 ?: System.getenv("RELEASE_STORE_FILE")
-                ?: keystoreProps.getProperty("storeFile")
+                ?: keystoreProps.getProperty("storeFile"))?.trim()
 
-            val storePasswordVal = System.getenv("KEYSTORE_PASSWORD")
+            val storePasswordVal = (System.getenv("KEYSTORE_PASSWORD")
                 ?: System.getenv("RELEASE_STORE_PASSWORD")
-                ?: keystoreProps.getProperty("storePassword")
+                ?: keystoreProps.getProperty("storePassword"))?.trim()
 
-            val keyAliasVal = System.getenv("KEY_ALIAS")
+            val keyAliasVal = (System.getenv("KEY_ALIAS")
                 ?: System.getenv("RELEASE_KEY_ALIAS")
-                ?: keystoreProps.getProperty("keyAlias")
+                ?: keystoreProps.getProperty("keyAlias"))?.trim()
 
-            val keyPasswordVal = System.getenv("KEY_PASSWORD")
+            val keyPasswordVal = (System.getenv("KEY_PASSWORD")
                 ?: System.getenv("RELEASE_KEY_PASSWORD")
-                ?: keystoreProps.getProperty("keyPassword")
+                ?: keystoreProps.getProperty("keyPassword"))?.trim()
 
             val isStrict = System.getenv("RELEASE_SIGNING_STRICT")?.toBoolean() ?: false
             if (storeFilePath != null && file(storeFilePath).exists()) {
