@@ -104,7 +104,7 @@ jobs:
           cat "chargingdot-${VERSION_NAME}.apk.sha256"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v2.0.8
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: |
             app/build/outputs/apk/release/chargingdot-${{ steps.version.outputs.version }}.apk
