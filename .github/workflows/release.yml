@@ -72,7 +72,7 @@ jobs:
       - name: Verify APK Signature
         run: |
           BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
-          "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+          "$BUILD_TOOLS_DIR/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk | grep -i "SHA-256 digest"
 
       - name: Package and Checksum Release Artifacts
         run: |
