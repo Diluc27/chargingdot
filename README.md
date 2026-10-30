@@ -65,6 +65,19 @@ Get-FileHash chargingdot-<version>.apk -Algorithm SHA256
 
 Compare the resulting hash against the contents of `chargingdot-<version>.apk.sha256`.
 
+### Verify Signing Certificate
+
+You can verify that the release APK was signed with the official project key using Android's `apksigner`:
+
+```bash
+apksigner verify --print-certs chargingdot-<version>.apk
+```
+
+Expected certificate SHA-256 fingerprint:
+```
+6B:9B:52:8E:C3:11:16:A5:FC:CF:C8:48:45:1D:9C:E2:13:94:90:E8:08:6E:44:5B:E7:8C:F7:33:94:55:6B:9E
+```
+
 ## Calibrate
 
 1. Open **Charging Dot** to launch the settings screen. While this screen is visible, preview mode activates automatically, displaying the dot even when the device is unplugged.
